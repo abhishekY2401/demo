@@ -18,19 +18,19 @@ pipeline {
         
         stage('Clone Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/abhishekY2401/demo.git'
+                git branch: 'main', url: 'https://github.com/abhibatekY2401/demo.git'
             }
         }
 
         stage('Build JAR') {
             steps {
-                sh "mvn clean package -DskipTests"
+                bat "mvn clean package -DskipTests"
             }
         }
 
         stage('Copy JAR to EC2') {
             steps {
-                sh """
+                bat """
                 scp -o StrictHostKeyChecking=no target/*.jar $EC2_USER@$EC2_HOST:/home/ubuntu/app/$APP_NAME
                 """
             }
@@ -38,8 +38,8 @@ pipeline {
 
         stage('Deploy on EC2') {
             steps {
-                sh """
-                ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
+                bat """
+                sbat -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
                 pkill -f "java -jar || true
                 export WEATHER_API_KEY=$WEATHER_API_KEY
                 nohup java -jar /home/ubuntu/app/$APP_NAME > app.log 2>&1 & 
@@ -50,8 +50,8 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                sh "sleep 10"
-                sh "curl http://$EC2_HOST:8081/weather/mumbai"
+                bat "sleep 10"
+                bat "curl http://$EC2_HOST:8081/weather/mumbai"
             }
         }
     }
