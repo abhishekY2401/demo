@@ -30,20 +30,24 @@ pipeline {
 
         stage('Copy JAR to EC2') {
             steps {
-                bat """
-                scp -o StrictHostKeyChecking=no target\\*.jar %EC2_USER%@%EC2_HOST%:/home/ubuntu/app/%APP_NAME%
-                """
+                sshagent(['ec2-key']) {
+                    bat """
+                    scp -o StrictHostKeyChecking=no target\\demo-0.0.1-SNAPSHOT.jar %EC2_USER%@%EC2_HOST%:/home/ubuntu/app/%APP_NAME%
+                    """
+                }
             }
         }
 
         stage('Deploy on EC2') {
             steps {
-                bat """
-                sbat -o StrictHostKeyChecking=no %EC2_USER%@%EC2_HOST% ^
-                "pkill -f 'java -jar' || true && ^
-                export WEATHER_API_KEY=%WEATHER_API_KEY% && ^
-                nohup java -jar /home/ubuntu/app/%APP_NAME% > app.log 2>&1 &"
-                """
+                sshagent(['ec2-key']) {
+                    bat """
+                    sbat -o StrictHostKeyChecking=no %EC2_USER%@%EC2_HOST% ^
+                    "pkill -f 'java -jar' || true && ^
+                    export WEATHER_API_KEY=%WEATHER_API_KEY% && ^
+                    nohup java -jar /home/ubuntu/app/%APP_NAME% > app.log 2>&1 &"
+                    """
+                }    
             }
         }
 
