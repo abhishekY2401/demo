@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         EC2_USER = "ubuntu"
-        EC2_HOST = "54.198.143.91"
+        EC2_HOST = "44.213.157.182"
         APP_NAME = "app.jar"
 
         WEATHER_API_KEY = credentials('weather_api_key')
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 sshagent(['ec2-key']) {
                     bat """
-                    scp -o StrictHostKeyChecking=no target\\demo-0.0.1-SNAPSHOT.jar %EC2_USER%@%EC2_HOST%:/home/ubuntu/app/%APP_NAME%
+                    scp -i C:\\Users\\Ritesh\\Downloads\\jenkins-key.pem StrictHostKeyChecking=no target\\demo-0.0.1-SNAPSHOT.jar %EC2_USER%@%EC2_HOST%:/home/ubuntu/app/%APP_NAME%
                     """
                 }
             }
