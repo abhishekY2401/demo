@@ -42,9 +42,10 @@ pipeline {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: 'ec2-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     bat """
+                    for /f "delims=" %%i in ('whoami') do set JENKINS_PRINCIPAL=%%i
                     icacls "%SSH_KEY%" /inheritance:r
                     icacls "%SSH_KEY%" /remove:g "BUILTIN\\Users" "NT AUTHORITY\\Authenticated Users" "Everyone"
-                    icacls "%SSH_KEY%" /grant:r "%USERNAME%:R" "NT AUTHORITY\\SYSTEM:R" "BUILTIN\\Administrators:R"
+                    icacls "%SSH_KEY%" /grant:r "%JENKINS_PRINCIPAL%:R" "*S-1-5-18:R" "*S-1-5-32-544:R"
                     scp -P %EC2_SSH_PORT% -o IdentitiesOnly=yes -o ConnectTimeout=15 -o ConnectionAttempts=2 -o StrictHostKeyChecking=no -i "%SSH_KEY%" target\\demo-0.0.1-SNAPSHOT.jar %SSH_USER%@%EC2_HOST%:/home/ubuntu/app/%APP_NAME%
                     """
                 }
@@ -55,9 +56,10 @@ pipeline {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: 'ec2-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     bat """
+                    for /f "delims=" %%i in ('whoami') do set JENKINS_PRINCIPAL=%%i
                     icacls "%SSH_KEY%" /inheritance:r
                     icacls "%SSH_KEY%" /remove:g "BUILTIN\\Users" "NT AUTHORITY\\Authenticated Users" "Everyone"
-                    icacls "%SSH_KEY%" /grant:r "%USERNAME%:R" "NT AUTHORITY\\SYSTEM:R" "BUILTIN\\Administrators:R"
+                    icacls "%SSH_KEY%" /grant:r "%JENKINS_PRINCIPAL%:R" "*S-1-5-18:R" "*S-1-5-32-544:R"
                     ssh -p %EC2_SSH_PORT% -o IdentitiesOnly=yes -o ConnectTimeout=15 -o ConnectionAttempts=2 -o StrictHostKeyChecking=no -i "%SSH_KEY%" %SSH_USER%@%EC2_HOST% "mkdir -p /home/ubuntu/app && pkill -f 'java -jar /home/ubuntu/app/%APP_NAME%' || true; WEATHER_API_KEY='%WEATHER_API_KEY%' nohup java -jar /home/ubuntu/app/%APP_NAME% >/home/ubuntu/app/app.log 2>&1 &"
                     """
                 }    
