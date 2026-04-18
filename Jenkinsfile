@@ -30,9 +30,9 @@ pipeline {
 
         stage('Copy JAR to EC2') {
             steps {
-                sshagent(['ec2-key']) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     bat """
-                    scp -i C:\\Users\\Ritesh\\Downloads\\jenkins-key.pem StrictHostKeyChecking=no target\\demo-0.0.1-SNAPSHOT.jar %EC2_USER%@%EC2_HOST%:/home/ubuntu/app/%APP_NAME%
+                    scp -o StrictHostKeyChecking=no -i "%SSH_KEY%" target\\demo-0.0.1-SNAPSHOT.jar %SSH_USER%@%EC2_HOST%:/home/ubuntu/app/%APP_NAME%
                     """
                 }
             }
@@ -40,12 +40,9 @@ pipeline {
 
         stage('Deploy on EC2') {
             steps {
-                sshagent(['ec2-key']) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     bat """
-                    sbat -o StrictHostKeyChecking=no %EC2_USER%@%EC2_HOST% ^
-                    "pkill -f 'java -jar' || true && ^
-                    export WEATHER_API_KEY=%WEATHER_API_KEY% && ^
-                    nohup java -jar /home/ubuntu/app/%APP_NAME% > app.log 2>&1 &"
+                    ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" %SSH_USER%@%EC2_HOST% "mkdir -p /home/ubuntu/app && pkill -f 'java -jar /home/ubuntu/app/%APP_NAME%' || true; WEATHER_API_KEY='%WEATHER_API_KEY%' nohup java -jar /home/ubuntu/app/%APP_NAME% >/home/ubuntu/app/app.log 2>&1 &"
                     """
                 }    
             }
