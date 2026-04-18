@@ -46,6 +46,7 @@ pipeline {
                     icacls "%SSH_KEY%" /inheritance:r
                     icacls "%SSH_KEY%" /remove:g "BUILTIN\\Users" "NT AUTHORITY\\Authenticated Users" "Everyone"
                     icacls "%SSH_KEY%" /grant:r "%JENKINS_PRINCIPAL%:R" "*S-1-5-18:R" "*S-1-5-32-544:R"
+                    ssh -p %EC2_SSH_PORT% -o IdentitiesOnly=yes -o ConnectTimeout=15 -o ConnectionAttempts=2 -o StrictHostKeyChecking=no -i "%SSH_KEY%" %SSH_USER%@%EC2_HOST% "mkdir -p /home/ubuntu/app"
                     scp -P %EC2_SSH_PORT% -o IdentitiesOnly=yes -o ConnectTimeout=15 -o ConnectionAttempts=2 -o StrictHostKeyChecking=no -i "%SSH_KEY%" target\\demo-0.0.1-SNAPSHOT.jar %SSH_USER%@%EC2_HOST%:/home/ubuntu/app/%APP_NAME%
                     """
                 }
