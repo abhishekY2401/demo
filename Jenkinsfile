@@ -31,10 +31,10 @@ pipeline {
 
         stage('Validate EC2 SSH Connectivity') {
             steps {
-                bat """
+                bat '''
                 powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $ip = (Invoke-RestMethod -Uri 'https://checkip.amazonaws.com' -TimeoutSec 10).Trim(); Write-Host 'Jenkins public egress IP:' $ip } catch { Write-Host 'Could not determine Jenkins public egress IP automatically.' }"
                 powershell -NoProfile -ExecutionPolicy Bypass -Command "$result = Test-NetConnection -ComputerName '%EC2_HOST%' -Port %EC2_SSH_PORT% -WarningAction SilentlyContinue; if (-not $result.TcpTestSucceeded) { Write-Host 'ERROR: Cannot reach %EC2_HOST% on port %EC2_SSH_PORT% from Jenkins agent.'; exit 1 } else { Write-Host 'SSH connectivity check passed.' }"
-                """
+                '''
             }
         }
 
